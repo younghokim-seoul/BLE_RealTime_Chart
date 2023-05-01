@@ -1,0 +1,115 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.cm.rxandroidble"
+        minSdkVersion 26
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+
+        releaseWithProps {
+            storeFile file("signature/partronwb.jks")
+            storePassword keystore_pass
+            keyAlias key_alias
+            keyPassword key_pass
+        }
+
+        debug {
+            storeFile file('signature/partronwb_debug.jks')
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildFeatures{
+        dataBinding = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.releaseWithProps
+//            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+
+        debug {
+            signingConfig signingConfigs.debug
+            debuggable true
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            def date = new Date();
+            def formattedDate = date.format('yyyy-MM-dd')
+
+            outputFileName = formattedDate+"-${variant.name}-${variant.applicationId}-${variant.versionName}.apk"
+        }
+    }
+
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+
+    // lifecycle
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.1"
+
+    // Kotlin components
+    def coroutines = '1.5.2'
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
+
+    // data binding
+    kapt "com.android.databinding:compiler:4.0.1"
+
+    // Koin
+    implementation "io.insert-koin:koin-android:$koin_version"
+    implementation "io.insert-koin:koin-core:$koin_version"
+
+    // for new API replaced startActivityForResult
+    implementation 'androidx.fragment:fragment-ktx:1.4.1'
+
+    // RxBle
+    implementation "com.polidea.rxandroidble2:rxandroidble:1.12.1"
+    // RxJava
+    implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+    implementation "io.reactivex.rxjava2:rxjava:2.2.17"
+    implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
+
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+}
