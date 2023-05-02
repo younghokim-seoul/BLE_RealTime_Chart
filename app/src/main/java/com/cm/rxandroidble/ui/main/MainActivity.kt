@@ -6,17 +6,19 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cm.rxandroidble.R
@@ -24,10 +26,18 @@ import com.cm.rxandroidble.databinding.ActivityMainBinding
 import com.cm.rxandroidble.ui.adapter.BleListAdapter
 import com.cm.rxandroidble.ui.dialog.WriteDialog
 import com.cm.rxandroidble.util.Util
+import com.cm.rxandroidble.util.setting
 import com.cm.rxandroidble.viewmodel.BleViewModel
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.polidea.rxandroidble2.exceptions.BleScanException
 import com.polidea.rxandroidble2.scan.ScanResult
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,6 +46,8 @@ class MainActivity : AppCompatActivity() {
 
     private var requestEnableBluetooth = false
     private var askGrant = false
+
+    private lateinit var binding: ActivityMainBinding
 
     companion object {
         val PERMISSIONS = arrayOf(
@@ -56,10 +68,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(
-            this,
-            R.layout.activity_main
-        )
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.viewModel = viewModel
 
         binding.rvBleList.setHasFixedSize(true)
@@ -78,21 +87,31 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!hasPermissions(this, PERMISSIONS_S_ABOVE)) {
                 requestPermissions(PERMISSIONS_S_ABOVE, REQUEST_ALL_PERMISSION)
             }
-        }else{
+        } else {
             if (!hasPermissions(this, PERMISSIONS)) {
                 requestPermissions(PERMISSIONS, REQUEST_ALL_PERMISSION)
             }
         }
 
         initObserver(binding)
+        chartSetting(binding)
+
 
     }
 
-    private fun initObserver(binding: ActivityMainBinding){
+    private fun chartSetting(binding: ActivityMainBinding) {
+        binding.chartRealtime.setting()
+
+        viewModel.latestY.onEach {
+            addEntry(it)
+        }.launchIn(lifecycleScope)
+    }
+
+    private fun initObserver(binding: ActivityMainBinding) {
         viewModel.apply {
             bleException.observe(this@MainActivity, Observer {
                 it.getContentIfNotHandled()?.let { reason ->
@@ -107,10 +126,11 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-            readTxt.observe(this@MainActivity,Observer{
+            readTxt.observe(this@MainActivity, Observer {
                 binding.txtRead.append("$it\n")
                 if ((binding.txtRead.measuredHeight - binding.scroller.scrollY) <=
-                    (binding.scroller.height + binding.txtRead.lineHeight)) {
+                    (binding.scroller.height + binding.txtRead.lineHeight)
+                ) {
                     binding.scroller.post {
                         binding.scroller.scrollTo(0, binding.txtRead.bottom)
                     }
@@ -119,12 +139,13 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
     private fun bleThrowable(reason: Int) = when (reason) {
         BleScanException.BLUETOOTH_DISABLED -> {
             requestEnableBluetooth = true
             requestEnableBLE()
         }
-        BleScanException.LOCATION_PERMISSION_MISSING->{
+        BleScanException.LOCATION_PERMISSION_MISSING -> {
             requestPermissions(LOCATION_PERMISSION, REQUEST_LOCATION_PERMISSION)
         }
         else -> {
@@ -148,6 +169,7 @@ class MainActivity : AppCompatActivity() {
             else -> "Unknown error"
         }
     }
+
     override fun onResume() {
         super.onResume()
         // finish app if the BLE is not supported
@@ -156,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onClickWrite(view: View){
+    fun onClickWrite(view: View) {
         val writeDialog = WriteDialog(this@MainActivity, object : WriteDialog.WriteDialogListener {
             override fun onClickSend(data: String, type: String) {
                 viewModel.writeData(data, type)
@@ -166,17 +188,17 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private val requestEnableBleResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            Util.showNotification("Bluetooth기능을 허용하였습니다.")
-            viewModel.startScan()
+    private val requestEnableBleResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                Util.showNotification("Bluetooth기능을 허용하였습니다.")
+                viewModel.startScan()
+            } else {
+                Util.showNotification("Bluetooth기능을 켜주세요.")
+                viewModel.stopScan()
+            }
+            requestEnableBluetooth = false
         }
-        else{
-            Util.showNotification("Bluetooth기능을 켜주세요.")
-            viewModel.stopScan()
-        }
-        requestEnableBluetooth = false
-    }
 
     /**
      * Request BLE enable
@@ -195,6 +217,7 @@ class MainActivity : AppCompatActivity() {
         }
         return true
     }
+
     // Permission check
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onRequestPermissionsResult(
@@ -204,17 +227,55 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         //when (requestCode) {
-            //REQUEST_LOCATION_PERMISSION -> {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permissions granted!", Toast.LENGTH_SHORT).show()
-                } else {
-                    requestPermissions(permissions, REQUEST_LOCATION_PERMISSION)
-                    Toast.makeText(this, "Permissions must be granted!", Toast.LENGTH_SHORT).show()
-                    askGrant = false
-                }
-            //}
+        //REQUEST_LOCATION_PERMISSION -> {
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permissions granted!", Toast.LENGTH_SHORT).show()
+        } else {
+            requestPermissions(permissions, REQUEST_LOCATION_PERMISSION)
+            Toast.makeText(this, "Permissions must be granted!", Toast.LENGTH_SHORT).show()
+            askGrant = false
+        }
         //}
+        //}
+    }
+
+
+    private fun addEntry(num: Double) {
+        var data : LineData? = binding.chartRealtime.data
+        if (data == null) {
+            data = LineData()
+            binding.chartRealtime.data = data
+        }
+        var set = data.getDataSetByIndex(0)
+        // set.addEntry(...); // can be called as well
+        if (set == null) {
+            set = createSet()
+            data.addDataSet(set)
+        }
+        data.addEntry(
+            Entry(set.entryCount.toFloat(), num.toFloat()),
+            0
+        )
+        data.notifyDataChanged()
+
+        // let the chart know it's data has changed
+        binding.chartRealtime.notifyDataSetChanged()
+        binding.chartRealtime.setVisibleXRangeMaximum(150f)
+        // this automatically refreshes the chart (calls invalidate())
+        binding.chartRealtime.moveViewTo(data.entryCount.toFloat(), 50f, YAxis.AxisDependency.LEFT)
+    }
+
+    private fun createSet(): LineDataSet {
+        val set = LineDataSet(null, "")
+        set.lineWidth = 1f
+        set.setDrawValues(false)
+        set.valueTextColor = Color.WHITE
+        set.color = Color.WHITE
+        set.mode = LineDataSet.Mode.CUBIC_BEZIER
+        set.setDrawCircles(false)
+        set.highLightColor = Color.rgb(190, 190, 190)
+        return set
     }
 
 

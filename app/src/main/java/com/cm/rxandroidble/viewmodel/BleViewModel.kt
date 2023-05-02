@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.cm.rxandroidble.BleRepository
 import com.cm.rxandroidble.MyApplication
 import com.cm.rxandroidble.util.Event
+import com.cm.rxandroidble.util.SampleDataSet.dump
 import com.cm.rxandroidble.util.Util
 import com.polidea.rxandroidble2.RxBleClient
 import com.polidea.rxandroidble2.RxBleConnection
@@ -22,7 +23,11 @@ import com.polidea.rxandroidble2.scan.ScanFilter
 import com.polidea.rxandroidble2.scan.ScanResult
 import com.polidea.rxandroidble2.scan.ScanSettings
 import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.concurrent.schedule
@@ -58,12 +63,16 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
         get() = _listUpdate
 
 
-
     // scan results
     private var scanResults: ArrayList<ScanResult>? = ArrayList()
     private val rxBleClient: RxBleClient = RxBleClient.create(MyApplication.applicationContext())
 
-
+    val latestY: Flow<Double> = flow {
+        for (y in dump) {
+            emit(y.toDouble())
+            delay(10)
+        }
+    }
 
     /**
      *  Start BLE Scan
@@ -141,7 +150,6 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     }
 
 
-
     fun connectDevice(device: RxBleDevice) {
         // register connectionStateListener
         connectionStateDisposable = device.observeConnectionStateChanges()
@@ -161,10 +169,10 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     private fun connectionStateListener(
         device: RxBleDevice,
         connectionState: RxBleConnection.RxBleConnectionState
-    ){
+    ) {
 
 
-        when(connectionState){
+        when (connectionState) {
             RxBleConnection.RxBleConnectionState.CONNECTED -> {
                 isConnect.set(true)
                 isConnecting.set(false)
@@ -190,7 +198,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     // notify toggle
     fun onClickNotify() {
-        if(!isRead) {
+        if (!isRead) {
             mNotificationSubscription = repository.bleNotification()
                 ?.subscribe({ bytes ->
                     // Given characteristic has been changes, here is the value.
@@ -203,7 +211,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                     repository.disconnectDevice()
                     isRead = false
                 })
-        }else{
+        } else {
             isRead = false
             mNotificationSubscription?.dispose()
         }
@@ -215,7 +223,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     fun writeData(data: String, type: String) {
 
         var sendByteData: ByteArray? = null
-        when(type){
+        when (type) {
             "string" -> {
                 sendByteData = data.toByteArray(Charset.defaultCharset())
             }
@@ -232,7 +240,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                 // Written data.
                 val str: String = byteArrayToHex(writeBytes)
                 Log.d("writtenBytes", str)
-                viewModelScope.launch{
+                viewModelScope.launch {
                     Util.showNotification("`$str` is written.")
                 }
             }, { throwable ->
@@ -271,5 +279,6 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
         mWriteSubscription?.dispose()
         connectionStateDisposable.dispose()
     }
+
 
 }
