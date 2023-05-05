@@ -114,6 +114,7 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:visibility="@{viewModel.scanVisible?View.GONE:View.VISIBLE}"
                 android:layout_weight="1">
 
                 <com.github.mikephil.charting.charts.LineChart

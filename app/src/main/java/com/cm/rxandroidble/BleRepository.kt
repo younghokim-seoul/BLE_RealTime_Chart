@@ -47,8 +47,7 @@ class BleRepository {
     /**
      * Read
      */
-    fun bleRead() =
-        rxBleConnection?.readCharacteristic(UUID.fromString(CHARACTERISTIC_RESPONSE_STRING))
+    fun bleRead() = rxBleConnection?.readCharacteristic(UUID.fromString(CHARACTERISTIC_RESPONSE_STRING))
 
 
     /**

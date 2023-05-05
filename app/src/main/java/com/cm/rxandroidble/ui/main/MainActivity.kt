@@ -37,6 +37,7 @@ import com.polidea.rxandroidble2.scan.ScanResult
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -106,9 +107,9 @@ class MainActivity : AppCompatActivity() {
     private fun chartSetting(binding: ActivityMainBinding) {
         binding.chartRealtime.setting()
 
-        viewModel.latestY.onEach {
-            addEntry(it)
-        }.launchIn(lifecycleScope)
+//        viewModel.latestY.onEach {
+//            addEntry(it)
+//        }.launchIn(lifecycleScope)
     }
 
     private fun initObserver(binding: ActivityMainBinding) {
@@ -136,7 +137,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
+
+            actionState.onEach {
+                addEntry(it.readData)
+            }.launchIn(lifecycleScope)
         }
+
 
     }
 
@@ -242,7 +248,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun addEntry(num: Double) {
-        var data : LineData? = binding.chartRealtime.data
+        var data: LineData? = binding.chartRealtime.data
         if (data == null) {
             data = LineData()
             binding.chartRealtime.data = data
@@ -261,7 +267,7 @@ class MainActivity : AppCompatActivity() {
 
         // let the chart know it's data has changed
         binding.chartRealtime.notifyDataSetChanged()
-        binding.chartRealtime.setVisibleXRangeMaximum(150f)
+        binding.chartRealtime.setVisibleXRangeMaximum(100f)
         // this automatically refreshes the chart (calls invalidate())
         binding.chartRealtime.moveViewTo(data.entryCount.toFloat(), 50f, YAxis.AxisDependency.LEFT)
     }

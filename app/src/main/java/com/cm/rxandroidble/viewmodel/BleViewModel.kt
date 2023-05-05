@@ -24,10 +24,10 @@ import com.polidea.rxandroidble2.scan.ScanResult
 import com.polidea.rxandroidble2.scan.ScanSettings
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.lang.Exception
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.concurrent.schedule
@@ -44,12 +44,20 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     // View Databinding
     var statusTxt = ObservableField("Press the Scan button to start Ble Scan.")
-    var scanVisible = ObservableBoolean(true)
+    var scanVisible = ObservableBoolean(false)
     var readTxt = MutableLiveData("")
     var connectedTxt = ObservableField("")
     var isScanning = ObservableBoolean(false)
     var isConnecting = ObservableBoolean(false)
     var isConnect = ObservableBoolean(false)
+
+
+
+    private val _actionState = MutableSharedFlow<ActionState>(extraBufferCapacity = 1)
+    val actionState: SharedFlow<ActionState> get() = _actionState.asSharedFlow()
+
+
+    data class ActionState(val readData : Double)
 
     var isRead = false
 
@@ -67,11 +75,20 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     private var scanResults: ArrayList<ScanResult>? = ArrayList()
     private val rxBleClient: RxBleClient = RxBleClient.create(MyApplication.applicationContext())
 
-    val latestY: Flow<Double> = flow {
-        for (y in dump) {
-            emit(y.toDouble())
-            delay(10)
-        }
+//    val latestY: Flow<Double> = flow {
+//        for (y in dump) {
+//            emit(y.toDouble())
+//            delay(10)
+//        }
+//    }
+
+
+    private fun removeFirstChar(str: String?): String? {
+        return str?.replaceFirst("^.".toRegex(), "")
+    }
+
+    private fun removeLastChar(str: String?): String? {
+        return str?.replaceFirst(".$".toRegex(), "")
     }
 
     /**
@@ -202,7 +219,28 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
             mNotificationSubscription = repository.bleNotification()
                 ?.subscribe({ bytes ->
                     // Given characteristic has been changes, here is the value.
-                    readTxt.postValue(byteArrayToHex(bytes))
+                    val packet = String(bytes)
+//                    readTxt.postValue(byteArrayToHex(bytes))
+                    readTxt.postValue(packet)
+
+                    if (packet.isValid()) {
+
+                        try {
+                            val lastRemove = removeFirstChar(packet)
+                            val firstRemove = removeLastChar(lastRemove)
+
+                            firstRemove?.let {
+                                viewModelScope.launch {
+                                    _actionState.emit(ActionState(readData = it.toDouble()))
+                                }
+
+                            }
+
+                        } catch (e: Exception) {
+
+                        }
+                    }
+
                     isRead = true
 
                 }, { throwable ->
@@ -217,6 +255,8 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
         }
 
     }
+
+    fun String.isValid(): Boolean = this.startsWith("S") && this.endsWith("E")
 
 
     // write
