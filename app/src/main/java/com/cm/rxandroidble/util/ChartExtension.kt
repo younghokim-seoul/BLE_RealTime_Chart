@@ -27,13 +27,15 @@ fun LineChart.setting() {
 
 // scaling and dragging (false-비활성화)
     this.isDragEnabled = true
-    this.setScaleEnabled(false)
+    this.isScaleXEnabled = true
+
 
 //auto scale
     this.isAutoScaleMinMaxEnabled = true
 
 // if disabled, scaling can be done on x- and y-axis separately
     this.setPinchZoom(false)
+
 
 //X축
     this.xAxis.setDrawGridLines(true)

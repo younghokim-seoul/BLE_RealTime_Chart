@@ -113,4 +113,6 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:5.0.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
+    implementation 'me.grantland:autofittextview:0.2.+'
+
 }

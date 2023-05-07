@@ -44,12 +44,15 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     // View Databinding
     var statusTxt = ObservableField("Press the Scan button to start Ble Scan.")
-    var scanVisible = ObservableBoolean(false)
+
+    //test 시 false변경
+    var scanVisible = ObservableBoolean(true)
     var readTxt = MutableLiveData("")
     var connectedTxt = ObservableField("")
     var isScanning = ObservableBoolean(false)
     var isConnecting = ObservableBoolean(false)
     var isConnect = ObservableBoolean(false)
+    var isNotify = ObservableBoolean(false)
 
 
 
@@ -215,6 +218,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     // notify toggle
     fun onClickNotify() {
+
         if (!isRead) {
             mNotificationSubscription = repository.bleNotification()
                 ?.subscribe({ bytes ->
@@ -242,15 +246,18 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                     }
 
                     isRead = true
+                    isNotify.set(true)
 
                 }, { throwable ->
                     // Handle an error here
                     throwable.printStackTrace()
                     repository.disconnectDevice()
                     isRead = false
+                    isNotify.set(false)
                 })
         } else {
             isRead = false
+            isNotify.set(false)
             mNotificationSubscription?.dispose()
         }
 

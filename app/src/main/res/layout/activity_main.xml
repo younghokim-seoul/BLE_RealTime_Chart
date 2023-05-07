@@ -44,7 +44,7 @@
                     android:background="@drawable/button_back"
                     android:enabled="@{viewModel.isScanning?false:true}"
                     android:onClick="@{()-> viewModel.onClickScan()}"
-                    android:text="@{viewModel.isScanning?`scanning..`:`star\nscan`}"
+                    android:text="@{viewModel.isScanning?`scanning..`:`start\nscan`}"
                     android:textColor="@color/white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -63,19 +63,35 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
-                <androidx.appcompat.widget.AppCompatButton
+
+                <LinearLayout
                     android:id="@+id/btn_read"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:layout_weight="1"
-                    android:background="@drawable/button_back2"
                     android:enabled="@{viewModel.isConnect?true:false}"
                     android:onClick="@{()->viewModel.onClickNotify()}"
-                    android:text="Notify\nToggle"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:layout_height="match_parent"
+                    android:background="@drawable/button_back2">
+
+
+                    <me.grantland.widget.AutofitTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:maxLines="3"
+                        android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/rubik"
+                        android:text="@{viewModel.isNotify()?`REAL DATA STOP`:`REAL DATA VIEW`}"
+                        android:textSize="13sp"
+                        tools:minTextSize="13sp" />
+
+
+
+
+                </LinearLayout>
+
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_send"
@@ -94,7 +110,7 @@
 
             <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="300dp"
                 android:visibility="@{viewModel.scanVisible?View.VISIBLE:View.GONE}">
 
                 <androidx.recyclerview.widget.RecyclerView
