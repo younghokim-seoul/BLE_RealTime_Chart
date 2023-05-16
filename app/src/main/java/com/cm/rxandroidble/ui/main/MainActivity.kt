@@ -100,16 +100,24 @@ class MainActivity : AppCompatActivity() {
 
         initObserver(binding)
         chartSetting(binding)
+        resetSetting(binding)
 
 
+    }
+
+    private fun resetSetting(binding: ActivityMainBinding){
+        binding.btnClear.setOnClickListener {
+            binding.txtRead.text = ""
+            binding.chartRealtime.clear()
+        }
     }
 
     private fun chartSetting(binding: ActivityMainBinding) {
         binding.chartRealtime.setting()
 
-//        viewModel.latestY.onEach {
-//            addEntry(it)
-//        }.launchIn(lifecycleScope)
+        viewModel.latestY.onEach {
+            addEntry(it)
+        }.launchIn(lifecycleScope)
     }
 
     private fun initObserver(binding: ActivityMainBinding) {

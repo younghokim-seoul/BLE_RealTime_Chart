@@ -46,7 +46,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     var statusTxt = ObservableField("Press the Scan button to start Ble Scan.")
 
     //test 시 false변경
-    var scanVisible = ObservableBoolean(true)
+    var scanVisible = ObservableBoolean(false)
     var readTxt = MutableLiveData("")
     var connectedTxt = ObservableField("")
     var isScanning = ObservableBoolean(false)
@@ -55,12 +55,16 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     var isNotify = ObservableBoolean(false)
 
 
-
     private val _actionState = MutableSharedFlow<ActionState>(extraBufferCapacity = 1)
     val actionState: SharedFlow<ActionState> get() = _actionState.asSharedFlow()
 
 
-    data class ActionState(val readData : Double)
+    private val _measureState = MutableSharedFlow<MeasureState>(extraBufferCapacity = 1)
+    val measureState: SharedFlow<MeasureState> get() = _measureState.asSharedFlow()
+
+
+    data class ActionState(val readData: Double)
+    data class MeasureState(val bpm: Int, val brps: Int, val sec: Int)
 
     var isRead = false
 
@@ -78,12 +82,25 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     private var scanResults: ArrayList<ScanResult>? = ArrayList()
     private val rxBleClient: RxBleClient = RxBleClient.create(MyApplication.applicationContext())
 
-//    val latestY: Flow<Double> = flow {
-//        for (y in dump) {
-//            emit(y.toDouble())
-//            delay(10)
-//        }
-//    }
+    val latestY: Flow<Double> = flow {
+        for (y in dump) {
+            emit(y.toDouble())
+            delay(10)
+        }
+    }
+
+    init {
+        val packet = "R123123123E"
+        val lastRemove = removeFirstChar(packet)
+        val firstRemove = removeLastChar(lastRemove)
+
+
+        firstRemove?.let {
+            val list = it.chunked(3)
+            Timber.i("::::list => " + list)
+
+        }
+    }
 
 
     private fun removeFirstChar(str: String?): String? {
@@ -227,7 +244,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 //                    readTxt.postValue(byteArrayToHex(bytes))
                     readTxt.postValue(packet)
 
-                    if (packet.isValid()) {
+                    if (packet.isMatchRawFormat()) {
 
                         try {
                             val lastRemove = removeFirstChar(packet)
@@ -241,6 +258,20 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                             }
 
                         } catch (e: Exception) {
+
+                        }
+                    }
+
+
+                    //R123123123E
+                    if (packet.isMatchMeasureFormat()) {
+                        val lastRemove = removeFirstChar(packet)
+                        val firstRemove = removeLastChar(lastRemove)
+
+
+                        firstRemove?.let {
+                            val list = it.chunked(3)
+
 
                         }
                     }
@@ -263,7 +294,8 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     }
 
-    fun String.isValid(): Boolean = this.startsWith("S") && this.endsWith("E")
+    private fun String.isMatchRawFormat(): Boolean = this.startsWith("S") && this.endsWith("E")
+    private fun String.isMatchMeasureFormat(): Boolean = this.startsWith("R") && this.endsWith("E")
 
 
     // write
