@@ -37,6 +37,7 @@ import com.polidea.rxandroidble2.scan.ScanResult
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 import java.util.*
 
 
@@ -115,9 +116,9 @@ class MainActivity : AppCompatActivity() {
     private fun chartSetting(binding: ActivityMainBinding) {
         binding.chartRealtime.setting()
 
-        viewModel.latestY.onEach {
-            addEntry(it)
-        }.launchIn(lifecycleScope)
+//        viewModel.latestY.onEach {
+//            addEntry(it)
+//        }.launchIn(lifecycleScope)
     }
 
     private fun initObserver(binding: ActivityMainBinding) {
@@ -146,9 +147,18 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
+
+            measureState.onEach {
+                binding.tickerPpg.text = it.bpm
+                binding.tickerSec.text = it.sec
+                binding.tickerBreath.text = it.brps
+            }.launchIn(lifecycleScope)
+
             actionState.onEach {
                 addEntry(it.readData)
             }.launchIn(lifecycleScope)
+
+
         }
 
 

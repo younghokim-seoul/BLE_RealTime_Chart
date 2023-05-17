@@ -157,7 +157,7 @@
             <ScrollView
                 android:id="@+id/scroller"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/background_scrollview"
@@ -187,7 +187,7 @@
 
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center_vertical"
                         android:layout_margin="5dp"
                         android:layout_weight="1"
@@ -195,8 +195,10 @@
 
 
                         <androidx.appcompat.widget.LinearLayoutCompat
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
+                            android:layout_width="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:layout_height="0dp">
 
                             <ImageView
                                 android:layout_width="65dp"
@@ -210,6 +212,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
                                 android:textStyle="bold"
+                                app:ticker_defaultCharacterList="number"
                                 app:ticker_animationDuration="1500"
                                 app:ticker_defaultPreferredScrollingDirection="any" />
 
@@ -225,8 +228,10 @@
 
 
                         <androidx.appcompat.widget.LinearLayoutCompat
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
+                            android:layout_width="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:layout_height="0dp">
 
                             <ImageView
                                 android:layout_width="65dp"
@@ -240,6 +245,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
                                 android:textStyle="bold"
+                                app:ticker_defaultCharacterList="number"
                                 app:ticker_animationDuration="1500"
                                 app:ticker_defaultPreferredScrollingDirection="any" />
 
@@ -255,8 +261,10 @@
 
 
                         <androidx.appcompat.widget.LinearLayoutCompat
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
+                            android:layout_width="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:layout_height="0dp">
 
                             <ImageView
                                 android:layout_width="65dp"
@@ -270,6 +278,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
                                 android:textStyle="bold"
+                                app:ticker_defaultCharacterList="number"
                                 app:ticker_animationDuration="1500"
                                 app:ticker_defaultPreferredScrollingDirection="any" />
 

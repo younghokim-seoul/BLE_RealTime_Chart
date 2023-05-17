@@ -46,7 +46,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     var statusTxt = ObservableField("Press the Scan button to start Ble Scan.")
 
     //test 시 false변경
-    var scanVisible = ObservableBoolean(false)
+    var scanVisible = ObservableBoolean(true)
     var readTxt = MutableLiveData("")
     var connectedTxt = ObservableField("")
     var isScanning = ObservableBoolean(false)
@@ -64,7 +64,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
 
     data class ActionState(val readData: Double)
-    data class MeasureState(val bpm: Int, val brps: Int, val sec: Int)
+    data class MeasureState(val bpm: String, val brps: String, val sec: String)
 
     var isRead = false
 
@@ -81,26 +81,14 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     // scan results
     private var scanResults: ArrayList<ScanResult>? = ArrayList()
     private val rxBleClient: RxBleClient = RxBleClient.create(MyApplication.applicationContext())
+//
+//    val latestY: Flow<Double> = flow {
+//        for (y in dump) {
+//            emit(y.toDouble())
+//            delay(10)
+//        }
+//    }
 
-    val latestY: Flow<Double> = flow {
-        for (y in dump) {
-            emit(y.toDouble())
-            delay(10)
-        }
-    }
-
-    init {
-        val packet = "R123123123E"
-        val lastRemove = removeFirstChar(packet)
-        val firstRemove = removeLastChar(lastRemove)
-
-
-        firstRemove?.let {
-            val list = it.chunked(3)
-            Timber.i("::::list => " + list)
-
-        }
-    }
 
 
     private fun removeFirstChar(str: String?): String? {
@@ -272,6 +260,19 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                         firstRemove?.let {
                             val list = it.chunked(3)
 
+                            try {
+                                viewModelScope.launch {
+                                    _measureState.emit(
+                                        MeasureState(
+                                            bpm = list[0],
+                                            brps = list[1],
+                                            sec = list[2]
+                                        )
+                                    )
+                                }
+                            } catch (e: Exception) {
+
+                            }
 
                         }
                     }
