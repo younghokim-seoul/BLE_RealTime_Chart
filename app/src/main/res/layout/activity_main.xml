@@ -154,30 +154,38 @@
 
             </FrameLayout>
 
-            <ScrollView
-                android:id="@+id/scroller"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:background="@drawable/background_scrollview"
-                android:fillViewport="true"
-                android:visibility="@{viewModel.scanVisible?View.GONE:View.VISIBLE}">
+
 
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="0dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_scrollview"
+                    android:fillViewport="true"
+                    android:visibility="@{viewModel.scanVisible?View.GONE:View.VISIBLE}">
 
 
-                    <com.cm.rxandroidble.util.PerfectScrollableTextView
-                        android:id="@+id/txt_read"
+                    <ScrollView
+                        android:id="@+id/scroller"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
+                        android:layout_height="match_parent"
+                        android:padding="5dp"
                         android:layout_weight="1"
-                        android:lineSpacingExtra="7dp"
-                        android:textColor="@color/lily_gray_2" />
+                        android:fillViewport="true">
+
+                        <com.cm.rxandroidble.util.PerfectScrollableTextView
+                            android:id="@+id/txt_read"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:lineSpacingExtra="7dp"
+                            android:textColor="@color/lily_gray_2" />
+
+
+                    </ScrollView>
+
 
                     <View
                         android:layout_width="2dp"
@@ -212,6 +220,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
                                 android:textStyle="bold"
+                                android:textColor="@color/measure_red"
                                 app:ticker_defaultCharacterList="number"
                                 app:ticker_animationDuration="1500"
                                 app:ticker_defaultPreferredScrollingDirection="any" />
@@ -245,6 +254,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
                                 android:textStyle="bold"
+                                android:textColor="@color/measure_red"
                                 app:ticker_defaultCharacterList="number"
                                 app:ticker_animationDuration="1500"
                                 app:ticker_defaultPreferredScrollingDirection="any" />
@@ -254,7 +264,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
-                                android:text="BrPS"
+                                android:text="BrPM"
                                 android:textStyle="bold" />
 
                         </androidx.appcompat.widget.LinearLayoutCompat>
@@ -278,6 +288,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
                                 android:textStyle="bold"
+                                android:textColor="@color/measure_red"
                                 app:ticker_defaultCharacterList="number"
                                 app:ticker_animationDuration="1500"
                                 app:ticker_defaultPreferredScrollingDirection="any" />
@@ -296,7 +307,6 @@
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
-            </ScrollView>
 
         </LinearLayout>
 

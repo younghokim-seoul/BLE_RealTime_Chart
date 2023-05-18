@@ -137,6 +137,7 @@ class MainActivity : AppCompatActivity() {
             })
 
             readTxt.observe(this@MainActivity, Observer {
+                Timber.i(":::::::::::김영호 가자")
                 binding.txtRead.append("$it\n")
                 if ((binding.txtRead.measuredHeight - binding.scroller.scrollY) <=
                     (binding.scroller.height + binding.txtRead.lineHeight)

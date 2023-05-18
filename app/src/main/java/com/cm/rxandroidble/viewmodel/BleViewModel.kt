@@ -26,8 +26,6 @@ import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
-import java.lang.Exception
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.concurrent.schedule
@@ -88,7 +86,6 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 //            delay(10)
 //        }
 //    }
-
 
 
     private fun removeFirstChar(str: String?): String? {
@@ -204,9 +201,11 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                 scanVisible.set(false)
                 connectedTxt.set("${device.macAddress} Connected.")
             }
+
             RxBleConnection.RxBleConnectionState.CONNECTING -> {
                 isConnecting.set(true)
             }
+
             RxBleConnection.RxBleConnectionState.DISCONNECTED -> {
                 isConnect.set(false)
                 isConnecting.set(false)
@@ -214,6 +213,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
                 scanResults = ArrayList()
                 _listUpdate.postValue(Event(scanResults))
             }
+
             RxBleConnection.RxBleConnectionState.DISCONNECTING -> {
 
             }
@@ -307,6 +307,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
             "string" -> {
                 sendByteData = data.toByteArray(Charset.defaultCharset())
             }
+
             "byte" -> {
                 if (data.length % 2 != 0) {
                     Util.showNotification("Byte Size Error")
