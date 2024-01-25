@@ -94,29 +94,27 @@
 
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_send"
+                    android:id="@+id/btn_sleep_mode"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:layout_weight="1"
                     android:background="@drawable/button_back2"
                     android:enabled="@{viewModel.isConnect?true:false}"
-                    android:onClick="onClickWrite"
-                    android:text="Write\nValue"
+                    android:text="SLEEP\nMODE"
                     android:textColor="@color/white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_clear"
+                    android:id="@+id/btn_sleep_data"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:layout_weight="1"
                     android:background="@drawable/button_back2"
                     android:enabled="@{viewModel.isConnect?true:false}"
-                    android:onClick="onClickWrite"
-                    android:text="Clear"
+                    android:text="SLEEP\nDATA"
                     android:textColor="@color/white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -298,7 +296,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginStart="10dp"
-                                android:text="SEC"
+                                android:text="Times"
                                 android:textStyle="bold" />
 
                         </androidx.appcompat.widget.LinearLayoutCompat>

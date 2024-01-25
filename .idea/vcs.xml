@@ -2,9 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/01BluetoothClassic_Android_Arduino" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/02BLE_MVVM" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/03SimpleBLE" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/04AndroidBleMVVMService" vcs="Git" />
   </component>
 </project>

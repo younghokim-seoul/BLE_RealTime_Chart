@@ -1,8 +1,6 @@
-package com.cm.rxandroidble.util
+package com.cm.rxandroidble.util.extension
 
-import android.R
 import android.graphics.Color
-import android.provider.CalendarContract
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.YAxis

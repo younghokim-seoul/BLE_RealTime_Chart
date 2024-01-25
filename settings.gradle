@@ -1,2 +1,4 @@
 include ':app'
+include ':MPChartLib'
 rootProject.name = "RxAndroidBle_MVVM"
+

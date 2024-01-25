@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sleep_line_width">2dp</dimen>
+    <dimen name="sleep_text_size">12dp</dimen>
+    <dimen name="sleep_stage_text_top_margin">3dp</dimen>
+    <dimen name="exercise_chart_label_text_size">11.5dp</dimen>
+</resources>

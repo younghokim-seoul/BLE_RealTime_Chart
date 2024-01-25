@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.cm.rxandroidble.BleRepository
 import com.cm.rxandroidble.MyApplication
 import com.cm.rxandroidble.util.Event
+import com.cm.rxandroidble.util.L
 import com.cm.rxandroidble.util.SampleDataSet.dump
 import com.cm.rxandroidble.util.Util
 import com.polidea.rxandroidble2.RxBleClient
@@ -26,14 +27,15 @@ import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.concurrent.schedule
 
 
-class BleViewModel(private val repository: BleRepository) : ViewModel() {
+internal class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
-    private lateinit var mScanSubscription: Disposable
+    private var mScanSubscription: Disposable? = null
     private var mNotificationSubscription: Disposable? = null
     private var mWriteSubscription: Disposable? = null
     private lateinit var connectionStateDisposable: Disposable
@@ -49,7 +51,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
     var connectedTxt = ObservableField("")
     var isScanning = ObservableBoolean(false)
     var isConnecting = ObservableBoolean(false)
-    var isConnect = ObservableBoolean(false)
+    var isConnect = ObservableBoolean(true)
     var isNotify = ObservableBoolean(false)
 
 
@@ -59,6 +61,10 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     private val _measureState = MutableSharedFlow<MeasureState>(extraBufferCapacity = 1)
     val measureState: SharedFlow<MeasureState> get() = _measureState.asSharedFlow()
+
+
+    private val _event = MutableSharedFlow<MainEvent>()
+    val event: Flow<MainEvent> = _event.asSharedFlow()
 
 
     data class ActionState(val readData: Double)
@@ -141,7 +147,7 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun stopScan() {
-        mScanSubscription.dispose()
+        mScanSubscription?.dispose()
         isScanning.set(false)
         statusTxt.set("Scan finished. Click on the name to connect to the device.")
 
@@ -223,7 +229,6 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     // notify toggle
     fun onClickNotify() {
-
         if (!isRead) {
             mNotificationSubscription = repository.bleNotification()
                 ?.subscribe({ bytes ->
@@ -291,6 +296,10 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
             isRead = false
             isNotify.set(false)
             mNotificationSubscription?.dispose()
+
+            viewModelScope.launch {
+                _event.emit(MainEvent.CLEAR_REALTIME())
+            }
         }
 
     }
@@ -333,6 +342,24 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     }
 
+    fun send(data: String) {
+        val sendByteData = data.toByteArray(Charset.defaultCharset())
+        val str: String = byteArrayToHex(sendByteData)
+        Timber.i("sendByteData $str")
+
+        mWriteSubscription = repository.writeData(sendByteData)?.subscribe({ writeBytes ->
+            // Written data.
+            val str: String = byteArrayToHex(writeBytes)
+            Timber.i("writtenBytes", str)
+            viewModelScope.launch {
+                Util.showNotification("`$str` is written.")
+            }
+        }, { throwable ->
+            // Handle an error here.
+            throwable.printStackTrace()
+        })
+    }
+
     private fun hexStringToByteArray(s: String): ByteArray {
         val len = s.length
         val data = ByteArray(len / 2)
@@ -355,11 +382,13 @@ class BleViewModel(private val repository: BleRepository) : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        mScanSubscription.dispose()
+        mScanSubscription?.dispose()
         repository.disconnectDevice()
         mWriteSubscription?.dispose()
         connectionStateDisposable.dispose()
     }
+}
 
-
+internal sealed class MainEvent {
+    class CLEAR_REALTIME() : MainEvent()
 }

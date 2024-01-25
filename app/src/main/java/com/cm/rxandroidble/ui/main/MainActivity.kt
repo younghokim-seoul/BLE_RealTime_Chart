@@ -24,26 +24,33 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cm.rxandroidble.R
 import com.cm.rxandroidble.databinding.ActivityMainBinding
 import com.cm.rxandroidble.ui.adapter.BleListAdapter
+import com.cm.rxandroidble.ui.detail.DetailActivity
 import com.cm.rxandroidble.ui.dialog.WriteDialog
 import com.cm.rxandroidble.util.Util
-import com.cm.rxandroidble.util.setting
+import com.cm.rxandroidble.util.extension.SleepType
+import com.cm.rxandroidble.util.extension.YYMMDDHHMMSS
+import com.cm.rxandroidble.util.extension.setting
+
 import com.cm.rxandroidble.viewmodel.BleViewModel
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.utils.L
 import com.polidea.rxandroidble2.exceptions.BleScanException
 import com.polidea.rxandroidble2.scan.ScanResult
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel by viewModel<BleViewModel>()
+    private val mainViewModel by viewModel<BleViewModel>()
     private var adapter: BleListAdapter? = null
 
     private var requestEnableBluetooth = false
@@ -71,7 +78,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.viewModel = viewModel
+        binding.viewModel = mainViewModel
 
         binding.rvBleList.setHasFixedSize(true)
         val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
@@ -84,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             override fun onClick(view: View, scanResult: ScanResult?) {
                 val device = scanResult?.bleDevice
                 if (device != null) {
-                    viewModel.connectDevice(device)
+                    mainViewModel.connectDevice(device)
                 }
             }
         })
@@ -101,31 +108,33 @@ class MainActivity : AppCompatActivity() {
 
         initObserver(binding)
         chartSetting(binding)
-        resetSetting(binding)
-
+        binding.buttonEvent()
 
     }
 
-    private fun resetSetting(binding: ActivityMainBinding){
-        binding.btnClear.setOnClickListener {
-            binding.txtRead.text = ""
-            binding.chartRealtime.clear()
+    private fun ActivityMainBinding.buttonEvent() {
+        this.btnSleepMode.setOnClickListener {
+            val time = LocalDateTime.now().YYMMDDHHMMSS(SleepType.START_SLEEP)
+            Timber.i("수면 측정 모드 시작 $time")
+            mainViewModel.send(time)
+        }
+
+        this.btnSleepData.setOnClickListener {
+            val time = LocalDateTime.now().YYMMDDHHMMSS(SleepType.DATA_SLEEP)
+            Timber.i("수면 데이터 모드 시작 $time")
+            mainViewModel.send(time)
         }
     }
 
     private fun chartSetting(binding: ActivityMainBinding) {
         binding.chartRealtime.setting()
-
-//        viewModel.latestY.onEach {
-//            addEntry(it)
-//        }.launchIn(lifecycleScope)
     }
 
     private fun initObserver(binding: ActivityMainBinding) {
-        viewModel.apply {
+        mainViewModel.apply {
             bleException.observe(this@MainActivity, Observer {
                 it.getContentIfNotHandled()?.let { reason ->
-                    viewModel.stopScan()
+                    mainViewModel.stopScan()
                     bleThrowable(reason)
                 }
             })
@@ -137,7 +146,6 @@ class MainActivity : AppCompatActivity() {
             })
 
             readTxt.observe(this@MainActivity, Observer {
-                Timber.i(":::::::::::김영호 가자")
                 binding.txtRead.append("$it\n")
                 if ((binding.txtRead.measuredHeight - binding.scroller.scrollY) <=
                     (binding.scroller.height + binding.txtRead.lineHeight)
@@ -159,6 +167,10 @@ class MainActivity : AppCompatActivity() {
                 addEntry(it.readData)
             }.launchIn(lifecycleScope)
 
+            event.onEach {
+                binding.txtRead.text = ""
+                binding.chartRealtime.clear()
+            }.launchIn(lifecycleScope)
 
         }
 
@@ -206,7 +218,7 @@ class MainActivity : AppCompatActivity() {
     fun onClickWrite(view: View) {
         val writeDialog = WriteDialog(this@MainActivity, object : WriteDialog.WriteDialogListener {
             override fun onClickSend(data: String, type: String) {
-                viewModel.writeData(data, type)
+                mainViewModel.writeData(data, type)
             }
         })
         writeDialog.show()
@@ -217,10 +229,10 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
                 Util.showNotification("Bluetooth기능을 허용하였습니다.")
-                viewModel.startScan()
+                mainViewModel.startScan()
             } else {
                 Util.showNotification("Bluetooth기능을 켜주세요.")
-                viewModel.stopScan()
+                mainViewModel.stopScan()
             }
             requestEnableBluetooth = false
         }
