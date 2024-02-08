@@ -24,6 +24,8 @@ import com.github.mikephil.charting.utils.ViewPortHandler;
 import java.util.HashMap;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class MyLineChartRenderer extends LineChartRenderer {
 
     private Paint mHighlightCirclePaint;
@@ -130,7 +132,6 @@ public class MyLineChartRenderer extends LineChartRenderer {
             }
         } else {
             // only one color per dataset
-            L.i("::씨발.");
             if (mLineBuffer.length < Math.max((entryCount) * pointsPerEntryPair, pointsPerEntryPair) * 2)
                 mLineBuffer = new float[Math.max((entryCount) * pointsPerEntryPair, pointsPerEntryPair) * 4];
 
@@ -192,15 +193,15 @@ public class MyLineChartRenderer extends LineChartRenderer {
 
     @Override
     protected void drawCircles(Canvas c) {
-        L.i("::드라우 서클");
         mRenderPaint.setStyle(Paint.Style.FILL);
-
         float phaseY = mAnimator.getPhaseY();
 
         mCirclesBuffer[0] = 0;
         mCirclesBuffer[1] = 0;
 
         List<ILineDataSet> dataSets = mChart.getLineData().getDataSets();
+
+
 
         for (int i = 0; i < dataSets.size(); i++) {
             ILineDataSet dataSet = dataSets.get(i);
@@ -224,7 +225,7 @@ public class MyLineChartRenderer extends LineChartRenderer {
             boolean drawTransparentCircleHole = drawCircleHole &&
                     dataSet.getCircleHoleColor() == ColorTemplate.COLOR_NONE;
 
-            L.i("::drawTransparentCircleHole " + drawTransparentCircleHole);
+
 
             DataSetImageCache imageCache;
 
@@ -239,7 +240,7 @@ public class MyLineChartRenderer extends LineChartRenderer {
 
 
             //only fill the cache with new bitmaps if a change is required
-            L.i("changeRequired" + changeRequired);
+
             if (changeRequired) {
                 imageCache.fill(dataSet, drawCircleHole, drawTransparentCircleHole);
             }
@@ -265,8 +266,8 @@ public class MyLineChartRenderer extends LineChartRenderer {
 
 
                 Bitmap circleBitmap = imageCache.getBitmap(j);
-
-
+                Paint paint = new Paint();
+                paint.setColor(Color.GREEN);
                 if (circleBitmap != null) {
                     c.drawBitmap(circleBitmap, mCirclesBuffer[0] - circleRadius, mCirclesBuffer[1] - circleRadius, null);
                 }
@@ -284,7 +285,6 @@ public class MyLineChartRenderer extends LineChartRenderer {
         protected boolean init(ILineDataSet set) {
             int size = set.getCircleColorCount();
 
-            L.i(":::::size " + size);
             boolean changeRequired = false;
 
             if (circleBitmaps == null) {
@@ -301,6 +301,10 @@ public class MyLineChartRenderer extends LineChartRenderer {
             int colorCount = set.getCircleColorCount();
             float circleRadius = set.getCircleRadius();
             float circleHoleRadius = set.getCircleHoleRadius();
+
+
+            Timber.i("::::::colorCount " + colorCount);
+
 
             for (int i = 0; i < colorCount; i++) {
                 Bitmap.Config conf = Bitmap.Config.ARGB_4444;
@@ -329,18 +333,23 @@ public class MyLineChartRenderer extends LineChartRenderer {
                     canvas.drawPath(mCirclePathBuffer, mRenderPaint);
 
                 } else {
+
+                    Paint paint = new Paint();
+                    paint.setColor(Color.BLACK);
+
                     canvas.drawCircle(
                             circleRadius,
                             circleRadius,
                             circleRadius,
-                            mRenderPaint);
+                            paint);
 
                     if (drawCircleHole) {
+
                         canvas.drawCircle(
                                 circleRadius,
                                 circleRadius,
                                 circleHoleRadius,
-                                mRenderPaint);
+                                paint);
                     }
                 }
 
@@ -356,6 +365,7 @@ public class MyLineChartRenderer extends LineChartRenderer {
     public void drawHighlighted(Canvas c, Highlight[] indices) {
         super.drawHighlighted(c, indices);
 
+        L.i(":::::drawHighlighted");
         float phaseY = mAnimator.getPhaseY();
         ILineDataSet lineData = mChart.getLineData().getDataSetByIndex(0);
         Transformer trans = mChart.getTransformer(lineData.getAxisDependency());

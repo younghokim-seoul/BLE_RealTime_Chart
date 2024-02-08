@@ -26,26 +26,28 @@ import com.cm.rxandroidble.databinding.ActivityMainBinding
 import com.cm.rxandroidble.ui.adapter.BleListAdapter
 import com.cm.rxandroidble.ui.detail.DetailActivity
 import com.cm.rxandroidble.ui.dialog.WriteDialog
+import com.cm.rxandroidble.ui.sleep.SleepModeActivity
 import com.cm.rxandroidble.util.Util
 import com.cm.rxandroidble.util.extension.SleepType
 import com.cm.rxandroidble.util.extension.YYMMDDHHMMSS
+import com.cm.rxandroidble.util.extension.removeFirstChar
+import com.cm.rxandroidble.util.extension.removeLastChar
 import com.cm.rxandroidble.util.extension.setting
-
+import com.cm.rxandroidble.util.extension.startActivity
 import com.cm.rxandroidble.viewmodel.BleViewModel
+import com.cm.rxandroidble.viewmodel.MainEvent
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.utils.L
-import com.polidea.rxandroidble2.exceptions.BleScanException
-import com.polidea.rxandroidble2.scan.ScanResult
+import com.polidea.rxandroidble3.exceptions.BleScanException
+import com.polidea.rxandroidble3.scan.ScanResult
+import com.skydoves.bundler.intentOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -57,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     private var askGrant = false
 
     private lateinit var binding: ActivityMainBinding
+
 
     companion object {
         val PERMISSIONS = arrayOf(
@@ -108,23 +111,26 @@ class MainActivity : AppCompatActivity() {
 
         initObserver(binding)
         chartSetting(binding)
-        binding.buttonEvent()
+        buttonEvent()
 
     }
 
-    private fun ActivityMainBinding.buttonEvent() {
-        this.btnSleepMode.setOnClickListener {
-            val time = LocalDateTime.now().YYMMDDHHMMSS(SleepType.START_SLEEP)
-            Timber.i("수면 측정 모드 시작 $time")
-            mainViewModel.send(time)
+
+
+
+
+    private fun buttonEvent() {
+        binding.btnSleepMode.setOnClickListener {
+            startActivity<SleepModeActivity>()
         }
 
-        this.btnSleepData.setOnClickListener {
-            val time = LocalDateTime.now().YYMMDDHHMMSS(SleepType.DATA_SLEEP)
-            Timber.i("수면 데이터 모드 시작 $time")
-            mainViewModel.send(time)
+        binding.btnSleepData.setOnClickListener {
+            val reqDataSleep = LocalDateTime.now().YYMMDDHHMMSS(SleepType.DATA_SLEEP_REQ)
+            mainViewModel.checkTimeOut(reqDataSleep)
+
         }
     }
+
 
     private fun chartSetting(binding: ActivityMainBinding) {
         binding.chartRealtime.setting()
@@ -168,8 +174,38 @@ class MainActivity : AppCompatActivity() {
             }.launchIn(lifecycleScope)
 
             event.onEach {
-                binding.txtRead.text = ""
-                binding.chartRealtime.clear()
+                when (it) {
+                    is MainEvent.EVENT_CLEAR -> {
+                        binding.txtRead.text = ""
+                        binding.chartRealtime.clear()
+                    }
+
+                    is MainEvent.EVENT_STOP_SLEEP -> {
+                        Util.showNotification("수면 종료 되었습니다.")
+                    }
+
+                    is MainEvent.EVENT_START_SLEEP -> {
+                        Util.showNotification("데이터 수집을 시작합니다.")
+                    }
+
+                    is MainEvent.EVENT_DATA_REQ_COMPLETE -> {
+                        Util.showNotification("데이터 수집 완료 되었습니다.")
+                        intentOf<DetailActivity> {
+                            putExtra("startTime",it.startTime)
+                            putExtra("endTime",it.endTime)
+                            putExtra("sleepArrayList", it.items)
+                            startActivity(this@MainActivity)
+                        }
+                    }
+
+                    is MainEvent.EVENT_DATA_REQ_TIME_OUT -> {
+                        Util.showNotification("데이터 수집 시간 초과")
+
+                    }
+
+                }
+
+
             }.launchIn(lifecycleScope)
 
         }
@@ -182,9 +218,11 @@ class MainActivity : AppCompatActivity() {
             requestEnableBluetooth = true
             requestEnableBLE()
         }
+
         BleScanException.LOCATION_PERMISSION_MISSING -> {
             requestPermissions(LOCATION_PERMISSION, REQUEST_LOCATION_PERMISSION)
         }
+
         else -> {
             Util.showNotification(bleScanExceptionReasonDescription(reason))
         }

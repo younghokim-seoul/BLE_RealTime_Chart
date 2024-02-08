@@ -3,7 +3,7 @@
 
 
     <string name="sleep_state_1_left">깊은 수면</string>
-    <string name="sleep_state_2_left">코어 수면</string>
+    <string name="sleep_state_2_left">얕은 수면</string>
     <string name="sleep_state_3_left">REM 수면</string>
     <string name="sleep_state_4_left">비수면 수면</string>
 </resources>

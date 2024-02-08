@@ -17,6 +17,7 @@ import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.L;
 import com.github.mikephil.charting.utils.MPPointD;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.github.mikephil.charting.utils.Transformer;
@@ -107,6 +108,7 @@ public class LineChartRenderer extends LineRadarRenderer {
 
         if (dataSet.getEntryCount() < 1)
             return;
+
 
         mRenderPaint.setStrokeWidth(dataSet.getLineWidth());
         mRenderPaint.setPathEffect(dataSet.getDashPathEffect());
@@ -632,6 +634,8 @@ public class LineChartRenderer extends LineRadarRenderer {
         for (int i = 0; i < dataSets.size(); i++) {
 
             ILineDataSet dataSet = dataSets.get(i);
+
+
 
             if (!dataSet.isVisible() || !dataSet.isDrawCirclesEnabled() ||
                     dataSet.getEntryCount() == 0)

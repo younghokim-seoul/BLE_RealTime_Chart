@@ -2,6 +2,7 @@ package com.cm.rxandroidble
 
 import android.app.Application
 import android.content.Context
+import com.cm.rxandroidble.di.appModule
 import com.cm.rxandroidble.di.repositoryModule
 import com.cm.rxandroidble.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -13,13 +14,13 @@ import timber.log.Timber.*
 
 class MyApplication : Application() {
 
-    init{
+    init {
         instance = this
     }
 
     companion object {
         lateinit var instance: MyApplication
-        fun applicationContext() : Context {
+        fun applicationContext(): Context {
             return instance.applicationContext
         }
     }
@@ -37,7 +38,7 @@ class MyApplication : Application() {
             // assets/koin.properties 파일에서 프로퍼티를 가져옴
             androidFileProperties()
             //module list
-            modules(listOf(repositoryModule, viewModelModule))
+            modules(listOf(appModule,repositoryModule, viewModelModule))
         }
 
     }

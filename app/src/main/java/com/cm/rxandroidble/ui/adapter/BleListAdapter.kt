@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.cm.rxandroidble.R
-import com.polidea.rxandroidble2.scan.ScanResult
+import com.polidea.rxandroidble3.scan.ScanResult
+
 
 class BleListAdapter
     : RecyclerView.Adapter<BleListAdapter.BleViewHolder>(){

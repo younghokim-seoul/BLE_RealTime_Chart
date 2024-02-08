@@ -17,27 +17,209 @@
         android:layout_height="match_parent">
 
 
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/baseline_arrow_back_ios_24"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title" />
+
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:text="수면정보"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
         <com.cm.rxandroidble.ui.widget.MyLineChart
             android:id="@+id/graphic_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="23dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-
-
-
-
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.7" />
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/view_sleep_info"
+            android:layout_width="match_parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideline"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:text="취침시간"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:id="@+id/tv_start_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="22dp" />
+
+                <TextView
+                    android:id="@+id/tv_start_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="12dp" />
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_start_time_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:text="기상시간"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:id="@+id/tv_end_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:id="@+id/tv_end_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="12dp" />
+
+
+
+            </LinearLayout>
+
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_sleep_info">
+
+            <com.skydoves.progressview.ProgressView
+                android:id="@+id/state_1_progress"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginRight="20dp"
+                app:progressView_borderColor="@color/white"
+                app:progressView_borderWidth="2dp"
+                app:progressView_colorBackground="@android:color/transparent"
+                app:progressView_colorProgress="#FF7F50"
+                app:progressView_highlightAlpha="0.8"
+                app:progressView_highlightWidth="1dp"
+                app:progressView_labelColorInner="@color/white"
+                app:progressView_labelColorOuter="@color/black"
+                app:progressView_labelSize="10dp"
+                app:progressView_labelSpace="10dp"
+                app:progressView_labelTypeface="bold"
+                app:progressView_radius="12dp" />
+
+            <com.skydoves.progressview.ProgressView
+                android:id="@+id/state_2_progress"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginRight="20dp"
+                app:progressView_borderColor="@color/white"
+                app:progressView_borderWidth="2dp"
+                app:progressView_colorBackground="@android:color/transparent"
+                app:progressView_colorProgress="#00CED1"
+                app:progressView_highlightAlpha="0.8"
+                app:progressView_highlightWidth="1dp"
+                app:progressView_labelColorInner="@color/white"
+                app:progressView_labelColorOuter="@color/black"
+                app:progressView_labelSize="10dp"
+                app:progressView_labelSpace="10dp"
+                app:progressView_labelTypeface="bold"
+                app:progressView_radius="12dp" />
+
+            <com.skydoves.progressview.ProgressView
+                android:id="@+id/state_3_progress"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginRight="20dp"
+                app:progressView_borderColor="@color/white"
+                app:progressView_borderWidth="2dp"
+                app:progressView_colorBackground="@android:color/transparent"
+                app:progressView_colorProgress="#1E90FF"
+                app:progressView_highlightAlpha="0.8"
+                app:progressView_highlightWidth="1dp"
+                app:progressView_labelColorInner="@color/white"
+                app:progressView_labelColorOuter="@color/black"
+                app:progressView_labelSize="10dp"
+                app:progressView_labelSpace="10dp"
+                app:progressView_labelTypeface="bold"
+                app:progressView_radius="12dp" />
+
+            <com.skydoves.progressview.ProgressView
+                android:id="@+id/state_4_progress"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginRight="20dp"
+                app:progressView_borderColor="@color/white"
+                app:progressView_borderWidth="2dp"
+                app:progressView_colorBackground="@android:color/transparent"
+                app:progressView_colorProgress="#00008B"
+                app:progressView_highlightAlpha="0.8"
+                app:progressView_highlightWidth="1dp"
+                app:progressView_labelColorInner="@color/white"
+                app:progressView_labelColorOuter="@color/black"
+                app:progressView_labelSize="10dp"
+                app:progressView_labelSpace="10dp"
+                app:progressView_labelTypeface="bold"
+                app:progressView_radius="12dp" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

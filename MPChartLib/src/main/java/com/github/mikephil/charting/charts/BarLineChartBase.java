@@ -58,6 +58,9 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      */
     protected boolean mAutoScaleMinMaxEnabled = false;
 
+
+    protected boolean mSleepSubLineEnabled = false;
+
     /**
      * flag that indicates if pinch-zoom is enabled. if true, both x and y axis
      * can be scaled with 2 fingers, if false, x and y axis can be scaled
@@ -197,28 +200,70 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     }
 
 
-
     private void drawSleepStageLine(Canvas canvas, Paint paint) {
         // 각 영역의 높이를 계산합니다.
         int width = getWidth();
         int height = getHeight();
         int sectionHeight = getHeight() / 4;
 
+
+        float yText;
+        String measureText;
+        // 각 영역의 상단 부분을 칠할 높이 (예: 각 섹션 높이의 0.01%)
+        int topSectionHeight = (int) (sectionHeight * 0.02);
+        int textTopMargin = (int) Utils.convertDpToPixel(10f) * 2;
+        int textLeftMargin = (int) Utils.convertDpToPixel(10f);
+        int yTop;
+
+        int blackRectHeight = topSectionHeight;
+
+        paint.setTextSize(Utils.convertDpToPixel(12f));
+
         // 첫 번째 영역 그리기
         paint.setColor(Color.RED);
         canvas.drawRect(0, 0, width, sectionHeight, paint);
 
+        paint.setColor(Color.BLACK);
+        yTop = (sectionHeight / 2) - (blackRectHeight / 2);
+        canvas.drawRect(0, yTop, width, yTop + blackRectHeight, paint);
+
+
+        measureText = "비수면";
+        canvas.drawText(measureText, textLeftMargin, yTop + blackRectHeight + textTopMargin, paint);
+
+
         // 두 번째 영역 그리기
-        paint.setColor(Color.GREEN);
+        paint.setColor(Color.TRANSPARENT);
         canvas.drawRect(0, sectionHeight, width, 2 * sectionHeight, paint);
 
+        // 두 번째 영역의 상단 부분 검은색으로 그리기
+        paint.setColor(Color.BLACK);
+        yTop = sectionHeight + (sectionHeight / 2) - (blackRectHeight / 2);
+        canvas.drawRect(0, yTop, width, yTop + blackRectHeight, paint);
+
+        measureText = "REM 수면";
+        canvas.drawText(measureText, 0, yTop + blackRectHeight + textTopMargin, paint);
+
         // 세 번째 영역 그리기
-        paint.setColor(Color.BLUE);
+        paint.setColor(Color.TRANSPARENT);
         canvas.drawRect(0, 2 * sectionHeight, width, 3 * sectionHeight, paint);
 
+        paint.setColor(Color.BLACK);
+        yTop = 2 * sectionHeight + (sectionHeight / 2) - (blackRectHeight / 2);
+        canvas.drawRect(0, yTop, width, yTop + blackRectHeight, paint);
+
+        measureText = "얕은 수면";
+        canvas.drawText(measureText, 0, yTop + blackRectHeight + textTopMargin, paint);
+
         // 네 번째 영역 그리기
-        paint.setColor(Color.YELLOW);
+        paint.setColor(Color.TRANSPARENT);
         canvas.drawRect(0, 3 * sectionHeight, width, height, paint);
+        paint.setColor(Color.BLACK);
+        yTop = 3 * sectionHeight + (sectionHeight / 2) - (blackRectHeight / 2);
+        canvas.drawRect(0, yTop, width, yTop + blackRectHeight, paint);
+
+        measureText = "깊은 수면";
+        canvas.drawText(measureText, 0, yTop - textTopMargin / 2, paint);
 
     }
 
@@ -234,7 +279,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         // execute all drawing commands
         drawGridBackground(canvas);
 
-//        drawSubInfo(canvas);
+        if(mSleepSubLineEnabled){
+            drawSubInfo(canvas);
+        }
+
 
         if (mAutoScaleMinMaxEnabled) {
             autoScale();
@@ -1274,8 +1322,8 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     /**
      * When disabled, the data and/or highlights will not be clipped to contentRect. Disabling this option can
-     *   be useful, when the data lies fully within the content rect, but is drawn in such a way (such as thick lines)
-     *   that there is unwanted clipping.
+     * be useful, when the data lies fully within the content rect, but is drawn in such a way (such as thick lines)
+     * that there is unwanted clipping.
      *
      * @param enabled
      */
@@ -1295,8 +1343,8 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     /**
      * When disabled, the data and/or highlights will not be clipped to contentRect. Disabling this option can
-     *   be useful, when the data lies fully within the content rect, but is drawn in such a way (such as thick lines)
-     *   that there is unwanted clipping.
+     * be useful, when the data lies fully within the content rect, but is drawn in such a way (such as thick lines)
+     * that there is unwanted clipping.
      *
      * @return
      */
@@ -1649,6 +1697,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      */
     public void setAutoScaleMinMaxEnabled(boolean enabled) {
         mAutoScaleMinMaxEnabled = enabled;
+    }
+
+    public void setSleepSubLineEnabled(boolean enabled){
+        mSleepSubLineEnabled = enabled;
     }
 
     /**
